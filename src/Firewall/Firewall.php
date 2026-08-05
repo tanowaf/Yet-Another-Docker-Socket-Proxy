@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace TanoWAF\YaDSPFirewall;
+namespace TanoWAF\YaDSP\Firewall;
 
 use TanoWAF\WAFCore\Firewall\Firewall as baseFirewall;
 

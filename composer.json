@@ -10,6 +10,7 @@
         "nyholm/psr7": "^1.8.2",
         "tanowaf/waf-core": "dev-main"
     },
+    "minimum-stability": "dev",
     "require-dev": {
         "ext-curl": "*",
         "ext-mbstring": "*",

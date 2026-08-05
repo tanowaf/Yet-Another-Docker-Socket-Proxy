@@ -5,15 +5,15 @@ require __DIR__ . '/../vendor/autoload.php';
 
 use Laminas\HttpHandlerRunner\Emitter\SapiEmitter;
 use Nyholm\Psr7\Factory\Psr17Factory;
-use TanoWAF\YaDSPFirewall\FirewallFactory;
+use TanoWAF\YaDSP\Firewall\FirewallFactory;
 use TanoWAF\YaDSP\Proxy\DSFilteringProxy;
 use TanoWAF\YaDSP\Proxy\DSProxy;
+use TanoWAF\WAFCore\Filter\Bidirectional\Tracer;
 use TanoWAF\WAFCore\Logger\ErrorLogger;
 use TanoWAF\WAFCore\Logger\FileLogger;
 use TanoWAF\WAFCore\Logger\FrankenPHPLogger;
 use TanoWAF\WAFCore\Middleware\Dispatcher;
-use TanoWAF\WAFCore\Middleware\Tracer;
-use TanoWAF\WAFCore\ServerRequestCreator;
+use TanoWAF\WAFCore\ServerRequest\Psr7\Creator as ServerRequestCreator;
 use TanoWAF\WAFCore\UpstreamClient\UpstreamClientFactory;
 
 $emitter = new SapiEmitter();
@@ -55,7 +55,7 @@ try {
     }
 
     // NB: the traces files will contain ALL DATA sent to and received from the Docker daemon.
-    // This has serious security implications. Please only enable this when troubleshooting / developing the YADSP itself.
+    // This has serious security implications. Please only enable this when troubleshooting / developing the YaDSP itself.
     // NB: the tracer could be injected either in front (before) or in the back of (after) the firewall.
     //     In front, it will log what the Docker client sends/received.
     //     In the back, it will log that ise sent/received to the Docker daemon
@@ -64,7 +64,7 @@ try {
     }
 
     $httpClient = (new UpstreamClientFactory())->createClient();
-    $upstreamConnector = new DSProxy($upstream, $httpClient, $logger);
+    $upstreamConnector = new DSProxy($upstream, $httpClient, null, $logger);
     $proxy = new DSFilteringProxy($firewall, $upstreamConnector, $logger);
 
 } catch (\Throwable $e) {

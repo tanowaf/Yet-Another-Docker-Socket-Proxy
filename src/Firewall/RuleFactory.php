@@ -1,8 +1,9 @@
 <?php
+declare(strict_types=1);
 
-namespace TanoWAF\YaDSPFirewall;
+namespace TanoWAF\YaDSP\Firewall;
 
-use TanoWAF\YaDSPMatcher\Request\MatcherFactory as RequestMatcherFactory;
+use TanoWAF\YaDSP\Matcher\Request\MatcherFactory as RequestMatcherFactory;
 use TanoWAF\YaDSP\Matcher\Response\MatcherFactory as ResponseMatcherFactory;
 use TanoWAF\WAFCore\Firewall\RuleFactory as BaseRuleFactory;
 use TanoWAF\WAFCore\Matcher\ChainFactory;
@@ -21,7 +22,7 @@ class RuleFactory extends BaseRuleFactory
     {
         if ($this->requestMatcherFactory === null) {
             $logicMatcherFactory = new LogicMatcherFactory($this->logger);
-            $this->requestMatcherFactory = new ChainFactory([new RequestMatcherFactory($this->logger), $logicMatcherFactory]);
+            $this->requestMatcherFactory = new ChainFactory([new RequestMatcherFactory($this->headerParserFactory, $this->logger), $logicMatcherFactory]);
             // inception! ;-)
             $logicMatcherFactory->setMatcherFactory($this->requestMatcherFactory);
         }
@@ -38,7 +39,7 @@ class RuleFactory extends BaseRuleFactory
     {
         if ($this->responseMatcherFactory === null) {
             $logicMatcherFactory = new LogicMatcherFactory($this->logger);
-            $this->responseMatcherFactory = new ChainFactory([new ResponseMatcherFactory($this->logger), $logicMatcherFactory]);
+            $this->responseMatcherFactory = new ChainFactory([new ResponseMatcherFactory($this->headerParserFactory, $this->logger), $logicMatcherFactory]);
             // inception! ;-)
             $logicMatcherFactory->setMatcherFactory($this->responseMatcherFactory);
         }

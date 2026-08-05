@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace TanoWAF\YaDSP\Matcher\Response;
 
-use TanoWAF\WAFCore\Matcher\MatcherInterface;
 use TanoWAF\WAFCore\Matcher\Response\MatcherFactory as BaseMatcherFactory;
 
 class MatcherFactory extends BaseMatcherFactory

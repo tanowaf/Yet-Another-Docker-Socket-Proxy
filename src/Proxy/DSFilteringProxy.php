@@ -1,13 +1,16 @@
 <?php
+declare(strict_types=1);
 
 namespace TanoWAF\YaDSP\Proxy;
 
 use Nyholm\Psr7\Response;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use TanoWAF\WAFCore\Proxy\FilteringProxy;
+use TanoWAF\WAFCore\Proxy\FixedUpstreamProxy;
+use TanoWAF\WAFCore\Server\MiddlewareAware;
 
-class DSFilteringProxy extends FilteringProxy
+/// @todo rename?
+class DSFilteringProxy extends MiddlewareAware
 {
     /**
      * Generates an "access denied" response: mimic what the Docker daemon returns by default for not-accepted requests,
