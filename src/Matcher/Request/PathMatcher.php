@@ -1,10 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace YADSP\Matcher\Request;
+namespace TanoWAF\YaDSP\Matcher\Request;
 
-use YAWAF\Core\Matcher\Request\PathMatcher as BasePathMatcher;
+use TanoWAF\WAFCore\Matcher\Request\PathMatcher as BasePathMatcher;
 
+/// @todo... sync with upstream
 class PathMatcher extends BasePathMatcher
 {
     /**

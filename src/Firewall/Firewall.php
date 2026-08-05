@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace YADSP\Firewall;
+namespace TanoWAF\YaDSPFirewall;
 
-use YAWAF\Core\Firewall\Firewall as baseFirewall;
+use TanoWAF\WAFCore\Firewall\Firewall as baseFirewall;
 
 /**
  * The class doing the actual filtering of Requests and Responses

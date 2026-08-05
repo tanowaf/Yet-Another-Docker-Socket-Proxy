@@ -1,34 +1,33 @@
 {
-    "name": "gggeek/yet-another-docker-socket-proxy",
+    "name": "tanowaf/yet-another-docker-socket-proxy",
     "description": "A WAF to filter access to the Docker Daemon API",
     "license": "GPL-2.0",
-    "homepage": "https://gggeek.github.io/docker-proxy-filter-php/",
     "keywords": [ "docker", "proxy", "security", "api", "firewall" ],
     "require": {
         "php": "^8.2",
         "ext-json": "*",
-        "gggeek/yet-another-waf-core": "dev-main",
         "laminas/laminas-httphandlerrunner": "^2.13.0",
-        "nyholm/psr7": "^1.8.2"
+        "nyholm/psr7": "^1.8.2",
+        "tanowaf/waf-core": "dev-main"
     },
     "require-dev": {
         "ext-curl": "*",
         "ext-mbstring": "*",
         "phpunit/phpunit": "^11",
-        "symfony/dotenv": "^v7.4.11|^8.0.11",
-        "symfony/http-client": "^7.4.9",
-        "guzzlehttp/guzzle": "^7.12.1",
+        "symfony/dotenv": "^v7.4.15|^8.0.15",
+        "symfony/http-client": "^7.4.15",
+        "guzzlehttp/guzzle": "^8.0.1",
         "yoast/phpunit-polyfills": "^4.0"
     },
     "scripts": {
         "setup-git-hooks": "if ln -s -f $(pwd)/.githooks/pre-push.sh .git/hooks/pre-push; then echo hooks installed; else echo fail; fi"
     },
     "autoload": {
-        "psr-4": {"YADSP\\": "src/"}
+        "psr-4": {"TanoWAF\\YaDSP\\": "src/"}
     },
     "autoload-dev": {
         "psr-4": {
-            "YADSP\\Tests\\": "tests/"
+            "TanoWAF\\YaDSP\\Tests\\": "tests/"
         }
     }
 }

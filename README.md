@@ -1,4 +1,4 @@
-# Yet Another Docker Socket Proxy
+# TanoWAF - Yet Another Docker Socket Proxy
 
 Yet another security-enhancing proxy for the Docker Socket.
 

@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace YADSP\Proxy;
+namespace TanoWAF\YaDSP\Proxy;
 
 use Psr\Http\Client\ClientInterface;
 use Psr\Log\LoggerInterface;
-use YAWAF\Core\Filter\Bidirectional\BidirectionalFilterInterface;
-use YAWAF\Core\Proxy\FixedUpstreamProxy as BaseProxy;
-use YAWAF\Core\UpstreamClient\UpstreamClientInterface;
+use TanoWAF\WAFCore\Filter\Bidirectional\BidirectionalFilterInterface;
+use TanoWAF\WAFCore\Proxy\FixedUpstreamProxy as BaseProxy;
+use TanoWAF\WAFCore\UpstreamClient\UpstreamClientInterface;
 
 class DSProxy extends BaseProxy
 {

@@ -1,11 +1,11 @@
 <?php
 
-namespace YADSP\Proxy;
+namespace TanoWAF\YaDSP\Proxy;
 
 use Nyholm\Psr7\Response;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use YAWAF\Core\Proxy\FilteringProxy;
+use TanoWAF\WAFCore\Proxy\FilteringProxy;
 
 class DSFilteringProxy extends FilteringProxy
 {

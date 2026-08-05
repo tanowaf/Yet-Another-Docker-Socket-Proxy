@@ -1,8 +1,8 @@
 <?php
 
-namespace YADSP\Firewall;
+namespace TanoWAF\YaDSPFirewall;
 
-use YAWAF\Core\Firewall\FirewallFactory as BaseFirewallFactory;
+use TanoWAF\WAFCore\Firewall\FirewallFactory as BaseFirewallFactory;
 
 class FirewallFactory extends BaseFirewallFactory
 {

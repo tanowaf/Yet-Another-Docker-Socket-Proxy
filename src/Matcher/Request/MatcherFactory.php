@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace YADSP\Matcher\Request;
+namespace TanoWAF\YaDSP\Matcher\Request;
 
 use Psr\Log\LoggerAwareInterface;
-use YAWAF\Core\Matcher\MatcherInterface;
-use YAWAF\Core\Matcher\Request\MatcherFactory as BaseMatcherFactory;
+use TanoWAF\WAFCore\Matcher\MatcherInterface;
+use TanoWAF\WAFCore\Matcher\Request\MatcherFactory as BaseMatcherFactory;
 
 class MatcherFactory extends BaseMatcherFactory
 {

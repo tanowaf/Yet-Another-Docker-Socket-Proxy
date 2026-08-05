@@ -41,3 +41,8 @@
   - matchers
   - filters
   via env vars + mounting dirs from the host
+
+- explore the possibility of running this as docker-daemon authz plugin - see https://docs.docker.com/engine/extend/plugins_authorization/
+  the main limitations seem to be:
+  - the fact that the contents of "streaming responses" will not be forwarded to the daemin for inspection
+  - the fact that there is no possibility to filter the daemon response - only to authorize or deny it

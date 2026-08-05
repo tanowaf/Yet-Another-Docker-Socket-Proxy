@@ -1,13 +1,13 @@
 <?php
 
-namespace YADSP\Firewall;
+namespace TanoWAF\YaDSPFirewall;
 
-use YADSP\Matcher\Request\MatcherFactory as RequestMatcherFactory;
-use YADSP\Matcher\Response\MatcherFactory as ResponseMatcherFactory;
-use YAWAF\Core\Firewall\RuleFactory as BaseRuleFactory;
-use YAWAF\Core\Matcher\ChainFactory;
-use YAWAF\Core\Matcher\Logic\MatcherFactory as LogicMatcherFactory;
-use YAWAF\Core\Matcher\MatcherFactoryInterface;
+use TanoWAF\YaDSPMatcher\Request\MatcherFactory as RequestMatcherFactory;
+use TanoWAF\YaDSP\Matcher\Response\MatcherFactory as ResponseMatcherFactory;
+use TanoWAF\WAFCore\Firewall\RuleFactory as BaseRuleFactory;
+use TanoWAF\WAFCore\Matcher\ChainFactory;
+use TanoWAF\WAFCore\Matcher\Logic\MatcherFactory as LogicMatcherFactory;
+use TanoWAF\WAFCore\Matcher\MatcherFactoryInterface;
 
 class RuleFactory extends BaseRuleFactory
 {

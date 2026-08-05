@@ -5,16 +5,16 @@ require __DIR__ . '/../vendor/autoload.php';
 
 use Laminas\HttpHandlerRunner\Emitter\SapiEmitter;
 use Nyholm\Psr7\Factory\Psr17Factory;
-use YADSP\Firewall\FirewallFactory;
-use YADSP\Proxy\DSFilteringProxy;
-use YADSP\Proxy\DSProxy;
-use YAWAF\Core\Logger\ErrorLogger;
-use YAWAF\Core\Logger\FileLogger;
-use YAWAF\Core\Logger\FrankenPHPLogger;
-use YAWAF\Core\Middleware\Dispatcher;
-use YAWAF\Core\Middleware\Tracer;
-use YAWAF\Core\ServerRequestCreator;
-use YAWAF\Core\UpstreamClient\UpstreamClientFactory;
+use TanoWAF\YaDSPFirewall\FirewallFactory;
+use TanoWAF\YaDSP\Proxy\DSFilteringProxy;
+use TanoWAF\YaDSP\Proxy\DSProxy;
+use TanoWAF\WAFCore\Logger\ErrorLogger;
+use TanoWAF\WAFCore\Logger\FileLogger;
+use TanoWAF\WAFCore\Logger\FrankenPHPLogger;
+use TanoWAF\WAFCore\Middleware\Dispatcher;
+use TanoWAF\WAFCore\Middleware\Tracer;
+use TanoWAF\WAFCore\ServerRequestCreator;
+use TanoWAF\WAFCore\UpstreamClient\UpstreamClientFactory;
 
 $emitter = new SapiEmitter();
 
