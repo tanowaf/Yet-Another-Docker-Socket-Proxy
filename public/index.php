@@ -6,17 +6,21 @@ require __DIR__ . '/../vendor/autoload.php';
 use Laminas\HttpHandlerRunner\Emitter\SapiEmitter;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use TanoWAF\YaDSP\Firewall\FirewallFactory;
-use TanoWAF\YaDSP\Proxy\DSFilteringProxy;
-use TanoWAF\YaDSP\Proxy\DSProxy;
+use TanoWAF\YaDSP\Proxy\DockerSocketWAF;
+use TanoWAF\YaDSP\Proxy\DockerSocketProxy;
 use TanoWAF\WAFCore\Filter\Bidirectional\Tracer;
+use TanoWAF\WAFCore\Http\CookieParserFactory;
+use TanoWAF\WAFCore\Http\HeaderParserFactory;
+use TanoWAF\WAFCore\Http\QueryStringParserFactory;
 use TanoWAF\WAFCore\Logger\ErrorLogger;
 use TanoWAF\WAFCore\Logger\FileLogger;
 use TanoWAF\WAFCore\Logger\FrankenPHPLogger;
 use TanoWAF\WAFCore\Middleware\Dispatcher;
+use TanoWAF\WAFCore\ServerRequest\Psr17\ServerRequestFactory;
 use TanoWAF\WAFCore\ServerRequest\Psr7\Creator as ServerRequestCreator;
 use TanoWAF\WAFCore\UpstreamClient\UpstreamClientFactory;
 
-$emitter = new SapiEmitter();
+$responseEmitter = new SapiEmitter();
 
 try {
     if (array_key_exists('YADSP_LOG_FILE', $_SERVER) && trim($_SERVER['YADSP_LOG_FILE']) !== '') {
@@ -29,15 +33,26 @@ try {
         }
     }
 
+    $cookieParserFactory = new CookieParserFactory();
+    $headerParserFactory = new HeaderParserFactory();
+    $queryStringParserFactory = new QueryStringParserFactory();
+
+    $cookieParser = $cookieParserFactory->fromConfiguration([]);
+    $headerParser = $headerParserFactory->fromConfiguration([]);
+
     $psr17Factory = new Psr17Factory();
-    $creator = new ServerRequestCreator(
-        $psr17Factory, // ServerRequestFactory
+    $requestCreator = new ServerRequestCreator(
         $psr17Factory, // UriFactory
-        $psr17Factory, // UploadedFileFactory
-        $psr17Factory  // StreamFactory
+        new ServerRequestFactory(
+            $psr17Factory, // UploadedFileFactory
+            $psr17Factory, // StreamFactory
+            $cookieParser,
+            $headerParser,
+            $queryStringParserFactory->fromConfiguration([])
+        )
     );
 
-    $upstream = DSProxy::DEFAULT_UPSTREAM;
+    $upstream = DockerSocketProxy::DEFAULT_UPSTREAM;
     if (array_key_exists('DOCKER_HOST', $_SERVER) && trim($_SERVER['DOCKER_HOST']) !== '') {
         $upstream = $_SERVER['DOCKER_HOST'];
     }
@@ -53,6 +68,8 @@ try {
     } else {
         $firewall = $firewallFactory->fromConfigString($config);
     }
+    $firewall->setCookieParser($cookieParser)
+        ->setHeaderParser($headerParser);
 
     // NB: the traces files will contain ALL DATA sent to and received from the Docker daemon.
     // This has serious security implications. Please only enable this when troubleshooting / developing the YaDSP itself.
@@ -64,40 +81,42 @@ try {
     }
 
     $httpClient = (new UpstreamClientFactory())->createClient();
-    $upstreamConnector = new DSProxy($upstream, $httpClient, null, $logger);
-    $proxy = new DSFilteringProxy($firewall, $upstreamConnector, $logger);
+    $upstreamProxy = new DockerSocketProxy($upstream, $httpClient, null, $logger);
+    $waf = new DockerSocketWAF($firewall, $upstreamProxy, $logger);
+
+    if (array_key_exists('FRANKENPHP_WORKER', $_SERVER) && (int)$_SERVER['FRANKENPHP_WORKER'] !== 0) {
+
+        $requestHandler = function() use($requestCreator, $waf, $responseEmitter) {
+            $serverRequest = $requestCreator->fromGlobals();
+            $response = $waf->handle($serverRequest);
+            $responseEmitter->emit($response);
+        };
+
+        $maxRequests = (int)($_SERVER['MAX_REQUESTS_PER_WORKER'] ?? 0);
+        for ($nbRequests = 0; !$maxRequests || $nbRequests < $maxRequests; ++$nbRequests) {
+
+            // NB: `set_exception_handler` is called only when the worker script ends,
+            // which may be unexpected, so we could (should?) catch and handle exceptions inside $handler
+
+            /** @noinspection PhpUndefinedFunctionInspection */
+            /** @phpstan-ignore function.notFound */
+            $keepRunning = \frankenphp_handle_request($requestHandler);
+
+            // Call the garbage collector to reduce the chances of it being triggered in the middle of a page generation
+            /// @todo do this every N requests?
+            gc_collect_cycles();
+
+            if (!$keepRunning) break;
+        }
+
+    } else {
+
+        $serverRequest = $requestCreator->fromGlobals();
+        $response = $waf->handle($serverRequest);
+        $responseEmitter->emit($response);
+
+    }
 
 } catch (\Throwable $e) {
-    $emitter->emit(DSFilteringProxy::getErrorResponse($e));
-    exit();
-}
-
-$handler = function() use($creator, $proxy, $emitter) {
-    $serverRequest = $creator->fromGlobals();
-    $response = $proxy->handle($serverRequest);
-    $emitter->emit($response);
-};
-
-if (!array_key_exists('FRANKENPHP_WORKER', $_SERVER) || (int)$_SERVER['FRANKENPHP_WORKER'] == 0) {
-
-    $handler();
-
-} else {
-
-    $maxRequests = (int)($_SERVER['MAX_REQUESTS_PER_WORKER'] ?? 0);
-    for ($nbRequests = 0; !$maxRequests || $nbRequests < $maxRequests; ++$nbRequests) {
-
-        // NB: `set_exception_handler` is called only when the worker script ends,
-        // which may be unexpected, so we could (should?) catch and handle exceptions inside $handler
-
-        /** @noinspection PhpUndefinedFunctionInspection */
-        /** @phpstan-ignore function.notFound */
-        $keepRunning = \frankenphp_handle_request($handler);
-
-        // Call the garbage collector to reduce the chances of it being triggered in the middle of a page generation
-        /// @todo do this every N requests?
-        gc_collect_cycles();
-
-        if (!$keepRunning) break;
-    }
+    $responseEmitter->emit(DockerSocketWAF::getErrorResponse($e));
 }

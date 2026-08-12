@@ -6,11 +6,9 @@ namespace TanoWAF\YaDSP\Proxy;
 use Nyholm\Psr7\Response;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use TanoWAF\WAFCore\Proxy\FixedUpstreamProxy;
 use TanoWAF\WAFCore\Server\MiddlewareAware;
 
-/// @todo rename?
-class DSFilteringProxy extends MiddlewareAware
+class DockerSocketWAF extends MiddlewareAware
 {
     /**
      * Generates an "access denied" response: mimic what the Docker daemon returns by default for not-accepted requests,

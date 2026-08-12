@@ -7,7 +7,7 @@ use TanoWAF\WAFCore\Proxy\FixedUpstreamProxy;
 use TanoWAF\WAFCore\UpstreamClient\UpstreamClientInterface;
 
 /// @todo rename?
-class DSProxy extends FixedUpstreamProxy
+class DockerSocketProxy extends FixedUpstreamProxy
 {
     const DEFAULT_UPSTREAM = '/var/run/docker.sock';
 
