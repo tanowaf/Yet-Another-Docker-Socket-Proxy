@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace TanoWAF\YaDSP\Firewall;
 
 use TanoWAF\WAFCore\Firewall\FirewallFactory as BaseFirewallFactory;
-use TanoWAF\WAFCore\Http\HeaderParserFactory;
 
 class FirewallFactory extends BaseFirewallFactory
 {
@@ -38,9 +37,7 @@ class FirewallFactory extends BaseFirewallFactory
             $config['*'] = $this->getFallbackConfiguration();
         }
 
-        $headerParserFactory = new HeaderParserFactory([], $this->logger);
-
-        $ruleFactory = new RuleFactory($headerParserFactory, $this->logger);
+        $ruleFactory = new RuleFactory($this->logger);
         $rules = [];
         foreach($config as $ruleName => $ruleSpec) {
             try {
@@ -51,7 +48,7 @@ class FirewallFactory extends BaseFirewallFactory
             }
         }
 
-        return new Firewall($rules, $this->logger);
+        return new Firewall($rules, $this->requestFactory, $this->responseFactory, $this->logger);
     }
 
     /**

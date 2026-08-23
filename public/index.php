@@ -16,8 +16,8 @@ use TanoWAF\WAFCore\Logger\ErrorLogger;
 use TanoWAF\WAFCore\Logger\FileLogger;
 use TanoWAF\WAFCore\Logger\FrankenPHPLogger;
 use TanoWAF\WAFCore\Middleware\Dispatcher;
+use TanoWAF\WAFCore\Response\Psr7\ResponseFactory;
 use TanoWAF\WAFCore\ServerRequest\Psr17\ServerRequestFactory;
-use TanoWAF\WAFCore\ServerRequest\Psr7\Creator as ServerRequestCreator;
 use TanoWAF\WAFCore\UpstreamClient\UpstreamClientFactory;
 
 $responseEmitter = new SapiEmitter();
@@ -33,31 +33,28 @@ try {
         }
     }
 
+    $psr17Factory = new Psr17Factory();
     $cookieParserFactory = new CookieParserFactory();
     $headerParserFactory = new HeaderParserFactory();
     $queryStringParserFactory = new QueryStringParserFactory();
-
     $cookieParser = $cookieParserFactory->fromConfiguration([]);
     $headerParser = $headerParserFactory->fromConfiguration([]);
-
-    $psr17Factory = new Psr17Factory();
-    $requestCreator = new ServerRequestCreator(
+    $requestFactory = new ServerRequestFactory(
         $psr17Factory, // UriFactory
-        new ServerRequestFactory(
-            $psr17Factory, // UploadedFileFactory
-            $psr17Factory, // StreamFactory
-            $cookieParser,
-            $headerParser,
-            $queryStringParserFactory->fromConfiguration([])
-        )
+        $psr17Factory, // UploadedFileFactory
+        $psr17Factory, // StreamFactory
+        $cookieParser,
+        $headerParser,
+        $queryStringParserFactory->fromConfiguration([])
     );
+    $responseFactory = new ResponseFactory($cookieParser, $headerParser);
 
     $upstream = DockerSocketProxy::DEFAULT_UPSTREAM;
     if (array_key_exists('DOCKER_HOST', $_SERVER) && trim($_SERVER['DOCKER_HOST']) !== '') {
         $upstream = $_SERVER['DOCKER_HOST'];
     }
 
-    $firewallFactory = new FirewallFactory($logger);
+    $firewallFactory = new FirewallFactory($requestFactory, $responseFactory, $logger);
     $config = array_key_exists('YADSP_CONFIG', $_SERVER) ? trim($_SERVER['YADSP_CONFIG']) : '';
     $configFile = array_key_exists('YADSP_CONFIG_FILE', $_SERVER) ? trim($_SERVER['YADSP_CONFIG_FILE']) : '';
     if ($configFile !== '') {
@@ -68,8 +65,6 @@ try {
     } else {
         $firewall = $firewallFactory->fromConfigString($config);
     }
-    $firewall->setCookieParser($cookieParser)
-        ->setHeaderParser($headerParser);
 
     // NB: the traces files will contain ALL DATA sent to and received from the Docker daemon.
     // This has serious security implications. Please only enable this when troubleshooting / developing the YaDSP itself.
@@ -86,8 +81,8 @@ try {
 
     if (array_key_exists('FRANKENPHP_WORKER', $_SERVER) && (int)$_SERVER['FRANKENPHP_WORKER'] !== 0) {
 
-        $requestHandler = function() use($requestCreator, $waf, $responseEmitter) {
-            $serverRequest = $requestCreator->fromGlobals();
+        $requestHandler = function() use($requestFactory, $waf, $responseEmitter) {
+            $serverRequest = $requestFactory->fromGlobals();
             $response = $waf->handle($serverRequest);
             $responseEmitter->emit($response);
         };
@@ -111,7 +106,7 @@ try {
 
     } else {
 
-        $serverRequest = $requestCreator->fromGlobals();
+        $serverRequest = $requestFactory->fromGlobals();
         $response = $waf->handle($serverRequest);
         $responseEmitter->emit($response);
 
